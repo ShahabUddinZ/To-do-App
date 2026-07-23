@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="bootstrap-5.3.8-dist/css/bootstrap.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <form id="studentForm" class="card my-3 p-3">
+            <input type="text" class="form-control" placeholder="Your Task" />
+            <small class="text-danger my-1"></small>
+            <button class="btn btn-sm btn-success mt-2" id="add">Add</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-md-6 p-3 text-center">
+          <div class="card">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Task</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody class="data-table"></tbody>
+            </table>
+          </div>
+          <button class="btn delete-all btn-outline-danger w-100 my-4">
+            Clear All Records
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let input = document.querySelector("input");
+      let error = document.querySelector("small");
+      let addbtn = document.querySelector("#add");
+      let deleteAll = document.querySelector(".delete-all");
+      let html = "";
+
+      let retrive = JSON.parse(window.localStorage.getItem("studentsData"));
+      let data = retrive || [];
+
+      // we can used this method as well. but the above one is easy.
+      //   if (retrive == null) {
+      //     let data = [];
+      //   } else {
+      //     data = retrive;
+      //   }
+
+      addbtn.addEventListener("click", () => {
+        let inputvalue = input.value;
+        if (inputvalue === "") {
+          error.innerText = "This feild is required!";
+        } else {
+          error.innerText = "";
+          data.push(inputvalue);
+          let JsonData = JSON.stringify(data);
+          window.localStorage.setItem("studentsData", JsonData);
+          input.value = "";
+        }
+
+        html = "";
+        getdata();
+        deleteData();
+      });
+
+      // getting the data through a function.
+      function getdata() {
+        let getData = window.localStorage.getItem("studentsData");
+        let getDataToArray = JSON.parse(getData);
+
+        getDataToArray.forEach((value, index) => {
+          html += `
+            <tr>
+                <td>${value}</td>
+                <td><button type="button" class="btn delete btn-sm btn-danger" data-index=${index}>Delete</button></td>
+            </tr> `;
+        });
+
+        document.querySelector(".data-table").innerHTML = html;
+      }
+
+      function deleteData() {
+        let deleteRecord = document.querySelectorAll(".delete");
+        for (let i = 0; i < deleteRecord.length; i++) {
+          deleteRecord[i].addEventListener("click", () => {
+            let indexNumber = deleteRecord[i].getAttribute("data-index");
+            let clearData = data.filter((value, key) => {
+              return indexNumber != key;
+            });
+            window.localStorage.setItem(
+              "studentsData",
+              JSON.stringify(clearData),
+            );
+            window.location.reload();
+          });
+        }
+      }
+
+      function deleteAllData() {
+        let deleteRecords = window.localStorage.removeItem("studentsData");
+        window.location.reload();
+      }
+      deleteAll.addEventListener("click", deleteAllData);
+
+      getdata();
+      deleteData();
+    </script>
+  </body>
+</html>
